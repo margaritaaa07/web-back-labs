@@ -153,7 +153,78 @@ def teapot():
     </body>
 </html>''', 418
 
+@app.errorhandler(500)
+def internal_server_error(err):
+    return '''
+<!doctype html>
+<html>
+    <head>
+        <title>500 - Ошибка сервера</title>
+        <link rel="stylesheet" href="''' + url_for('static', filename='lab1.css') + '''">
+        <style>
+            body {
+                text-align: center;
+                padding: 50px;
+                font-family: Arial, sans-serif;
+                background-color: #fff5f5;
+            }
+            h1 {
+                font-size: 80px;
+                color: #e53e3e;
+                margin: 0;
+            }
+            h2 {
+                color: #333;
+                margin: 20px 0;
+            }
+            .error-box {
+                background: white;
+                padding: 20px;
+                border-radius: 10px;
+                max-width: 600px;
+                margin: 20px auto;
+                border-left: 4px solid #e53e3e;
+            }
+            a {
+                display: inline-block;
+                padding: 10px 20px;
+                background: grey;
+                color: black;
+                text-decoration: none;
+                border-radius: 5px;
+                margin: 10px;
+            }
+            a:hover {
+                background: black;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>500</h1>
+        <h2>Внутренняя ошибка сервера</h2>
+        
+        <div class="error-box">
+            <p>На сервере произошла непредвиденная ошибка.</p>
+            <p>Мы уже знаем о проблеме и работаем над её решением.</p>
+            <p>Попробуйте обновить страницу через несколько минут.</p>
+        </div>
+        
+        <div>
+            <a href="/">На главную</a>
+            <a href="javascript:location.reload()">Обновить страницу</a>
+        </div>
+        
+        <p style="margin-top: 30px; color: #666; font-size: 14px;">
+            Если ошибка повторяется, свяжитесь с администратором: 
+            <a href="malito:rita.berezhnayaaa@gmail.com" style="color: #555;">rita.berezhnayaaa@gmail.com</a>
+        </p>
+    </body>
+</html>''', 500
 
+@app.route("/server_error")
+def cause_server_error():
+    result = 1 / 0
+    return "Эта строка никогда не будет выполнена"
 @app.route("/")
 @app.route("/index")
 def index():
@@ -230,6 +301,7 @@ def http_codes():
             <li><a href="/forbidden">403 - Forbidden</a></li>
             <li><a href="/method_not_allowed">405 - Method Not Allowed</a></li>
             <li><a href="/teapot">418 - I'm a teapot</a></li>
+            <li><a href="/server_error">500 - Internal Server Error</a></li>
         </ul>
         <a href="/">На главную</a>
     </body>
