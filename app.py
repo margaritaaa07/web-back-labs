@@ -345,8 +345,12 @@ def author():
         <br>
         <a href="/lab1">Назад к главной</a>
     </body>
-</html>'''
-    
+</html>''', 200, {
+        'Content-Language': 'ru-RU',  
+        'X-Image-Type': 'Nature',     
+        'X-Server-Location': 'Novosibirsk',  
+        'X-Student-Name': 'Berezhnaya Margarita' 
+    }
 
 @app.route('/lab1/image')  
 def image():
