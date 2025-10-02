@@ -1,4 +1,4 @@
-from flask import Flask, url_for, request, redirect, abort
+from flask import Flask, url_for, request, redirect, abort, render_template, make_response
 import datetime
 app = Flask(__name__)
 
@@ -326,6 +326,7 @@ def internal_server_error(err):
 def cause_server_error():
     result = 1 / 0
     return "Эта строка никогда не будет выполнена"
+
 @app.route("/")
 @app.route("/index")
 def index():
@@ -442,7 +443,7 @@ def author():
     faculty = "ФБ"
     css_url = url_for('static', filename='lab1.css')
     
-    return f'''
+    html_content = f'''
 <!doctype html>
 <html>
     <head>
@@ -456,18 +457,21 @@ def author():
         <br>
         <a href="/lab1">Назад к главной</a>
     </body>
-</html>''', 200, {
-        'Content-Language': 'ru-RU',  
-        'X-Image-Type': 'Nature',     
-        'X-Server-Location': 'Novosibirsk',  
-        'X-Student-Name': 'Berezhnaya Margarita' 
-    }
+</html>'''
+    
+    response = make_response(html_content)
+    response.headers['Content-Language'] = 'ru-RU'
+    response.headers['X-Image-Type'] = 'Nature'
+    response.headers['X-Server-Location'] = 'Novosibirsk'
+    response.headers['X-Student-Name'] = 'Berezhnaya Margarita'
+    return response
 
 @app.route('/lab1/image')  
 def image():
     path = url_for("static", filename="oak.jpg")
-    css_url = url_for('static', filename='lab1.css')  
-    return f'''
+    css_url = url_for('static', filename='lab1.css')
+    
+    html_content = f'''
 <!doctype html>
 <html>
     <head>
@@ -481,6 +485,14 @@ def image():
     </body>
 </html>
 '''
+    
+    response = make_response(html_content)
+    response.headers['Content-Language'] = 'ru'  
+    response.headers['X-Student-Name'] = 'Berezhnaya Margarita' 
+    response.headers['X-University'] = 'NSTU'  
+    response.headers['X-Custom-Header'] = 'Laboratory Work 1'  
+    
+    return response
 
 count = 0
 
@@ -549,18 +561,19 @@ def a2():
     return 'со слэшем'
 
 flower_list = ['роза', 'тюльпан', 'незабудка', 'ромашка']
+
 @app.route('/lab2/flowers/<int:flower_id>')
 def flowers(flower_id):
     if flower_id >= len(flower_list):
         abort(404)
     else:
-         return "id=" + flower_list[flower_id]
+        return "id=" + flower_list[flower_id]
     
 @app.route('/lab2/add_flower/<name>')
 def add_flower(name):
     flower_list.append(name)
     return f'''
-<doctype html>
+<!doctype html>
 <html>
     <body>
     <h1>Добавлен новый цветок</h1>
@@ -570,6 +583,10 @@ def add_flower(name):
     </body>
 </html>
 '''
+
+@app.route('/lab2/example')
+def example():
+    return render_template('example.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
