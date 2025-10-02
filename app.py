@@ -540,5 +540,13 @@ def created():
 </html>
 ''', 201
 
+@app.route('/lab2/a')
+def a():
+    return 'без слэша'
+
+@app.route('/lab2/a/')
+def a2():
+    return 'со слэшем'
+
 if __name__ == '__main__':
     app.run(debug=True)
