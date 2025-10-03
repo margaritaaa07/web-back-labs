@@ -675,7 +675,24 @@ def calc_default():
 
 @app.route('/lab2/calc/<int:a>')
 def calc_single(a):
-    return redirect(f'/lab2/calc/{a}/1')
+     return redirect(f'/lab2/calc/{a}/1')
+
+books = [
+    {'author': 'Фёдор Достоевский', 'title': 'Преступление и наказание', 'genre': 'Роман', 'pages': 671},
+    {'author': 'Джордж Оруэлл', 'title': '1984', 'genre': 'Антиутопия', 'pages': 320},
+    {'author': 'Джоан Роулинг', 'title': 'Гарри Поттер и философский камень', 'genre': 'Фэнтези', 'pages': 400},
+    {'author': 'Агата Кристи', 'title': 'Убийство в Восточном экспрессе', 'genre': 'Детектив', 'pages': 250},
+    {'author': 'Александр Пушкин', 'title': 'Евгений Онегин', 'genre': 'Роман в стихах', 'pages': 240},
+    {'author': 'Эрих Мария Ремарк', 'title': 'Три товарища', 'genre': 'Военная проза', 'pages': 380},
+    {'author': 'Александр Дюма', 'title': 'Граф Монте-Кристо', 'genre': 'Исторический приключенческий роман', 'pages': 1200},
+    {'author': 'Джон Р. Р. Толкин', 'title': 'Властелин Колец', 'genre': 'Эпическое фэнтези', 'pages': 1100},
+    {'author': 'Эрнест Хемингуэй', 'title': 'Старик и море', 'genre': 'Притча', 'pages': 110},
+    {'author': 'Михаил Лермонтов', 'title': 'Герой нашего времени', 'genre': 'Роман', 'pages': 224},
+]
+
+@app.route('/lab2/books/')
+def books_list():
+    return render_template('books.html', books=books)
 
 if __name__ == '__main__':
     app.run(debug=True)
