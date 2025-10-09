@@ -1,6 +1,8 @@
 from flask import Flask, url_for, request, redirect, abort, render_template, make_response
 import datetime
+from lab1 import lab1
 app = Flask(__name__)
+app.register_blueprint(lab1)
 
 access_log = []
 
@@ -356,44 +358,6 @@ def index():
             &copy; Бережная Маргарита Валерьевна, ФБИ-33, 3 курс, 2025
         </footer>
     </body>
-</html>'''    
-
-@app.route("/lab1")
-def lab1():
-    return '''
-<!doctype html>
-<html>
-    <head>
-        <link rel="stylesheet" href="''' + url_for('static', filename='lab1.css') + '''">
-        <title>Лабораторная 1</title>
-    </head>
-    <body>
-    <h1>Лабораторная работа 1</h1>
-        <p>Flask — фреймворк для создания веб-приложений на языке
-        программирования Python, использующий набор инструментов
-        Werkzeug, а также шаблонизатор Jinja2. Относится к категории так
-        называемых микрофреймворков — минималистичных каркасов
-        веб-приложений, сознательно предоставляющих лишь самые базовые возможности.</p>
-        
-        <a href="/">На главную</a>
-
-
-        <h2>Список роутов</h2>
-        <ul>
-            <li><a href="/lab1/author">Автор</a></li>
-            <li><a href="/lab1/web">WEB</a></li>
-            <li><a href="/lab1/image">Дуб</a></li>
-            <li><a href="/lab1/counter">Счетчик</a></li>
-            <li><a href="/bad_request">400 - Bad Request</a></li>
-            <li><a href="/unauthorized">401 - Unauthorized</a></li>
-            <li><a href="/payment_required">402 - Payment Required</a></li>
-            <li><a href="/forbidden">403 - Forbidden</a></li>
-            <li><a href="/nonexistent_page">404 - Not Found</a></li>
-            <li><a href="/method_not_allowed">405 - Method Not Allowed</a></li>
-            <li><a href="/teapot">418 - I'm a teapot</a></li>
-            <li><a href="/server_error">500 - Internal Server Error</a></li>
-        </ul>
-    </body>
 </html>''' 
 
 @app.route("/http_codes")
@@ -419,139 +383,6 @@ def http_codes():
         <a href="/">На главную</a>
     </body>
 </html>'''
-
-@app.route("/lab1/web")  
-def web():
-    css_url = url_for('static', filename='lab1.css')
-    return f'''
-<!doctype html>
-<html>
-    <head>
-        <link rel="stylesheet" href="{css_url}">
-    </head>
-    <body>
-        <h1>web-сервер на flask</h1>
-        <a href="/lab1/author">author</a>
-        <br>
-        <a href="/lab1">Назад к главной</a>
-    </body>
-</html>'''
-
-@app.route("/lab1/author")  
-def author():
-    name = "Бережная Маргарита Валерьевна"
-    group = "ФБИ-33"
-    faculty = "ФБ"
-    css_url = url_for('static', filename='lab1.css')
-    
-    html_content = f'''
-<!doctype html>
-<html>
-    <head>
-        <link rel="stylesheet" href="{css_url}">
-    </head>           
-    <body>
-        <p>Студент: {name}</p>
-        <p>Группа: {group}</p>
-        <p>Факультет: {faculty}</p>
-        <a href="/lab1/web">web</a>
-        <br>
-        <a href="/lab1">Назад к главной</a>
-    </body>
-</html>'''
-    
-    response = make_response(html_content)
-    response.headers['Content-Language'] = 'ru-RU'
-    response.headers['X-Image-Type'] = 'Nature'
-    response.headers['X-Server-Location'] = 'Novosibirsk'
-    response.headers['X-Student-Name'] = 'Berezhnaya Margarita'
-    return response
-
-@app.route('/lab1/image')  
-def image():
-    path = url_for("static", filename="oak.jpg")
-    css_url = url_for('static', filename='lab1.css')
-    
-    html_content = f'''
-<!doctype html>
-<html>
-    <head>
-        <link rel="stylesheet" href="{css_url}">
-    </head>
-    <body>
-        <h1>Дуб</h1>
-        <img src="{path}">
-        <br>
-        <a href="/lab1">Назад к главной</a>
-    </body>
-</html>
-'''
-    
-    response = make_response(html_content)
-    response.headers['Content-Language'] = 'ru'  
-    response.headers['X-Student-Name'] = 'Berezhnaya Margarita' 
-    response.headers['X-University'] = 'NSTU'  
-    response.headers['X-Custom-Header'] = 'Laboratory Work 1'  
-    
-    return response
-
-count = 0
-
-@app.route('/lab1/counter') 
-def counter():
-    global count
-    count += 1
-    time = datetime.datetime.today()  
-    url = request.url
-    client_ip = request.remote_addr
-    css_url = url_for('static', filename='lab1.css')  
-    
-    return f'''
-<!doctype html>
-<html>
-    <head>
-        <link rel="stylesheet" href="{css_url}">
-    </head>
-    <body>
-        <h2>Счетчик посещений</h2>
-        Сколько раз вы сюда заходили: {count}
-        <hr>
-        Дата и время: {time}<br>
-        Запрошенный адрес: {url}<br>
-        Ваш IP-адрес: {client_ip}<br>
-        <a href="/lab1">Назад к главной</a>
-        <br>
-        <a href="/reset_counter">Очистить счётчик</a>
-    </body>
-</html>
-'''
-
-@app.route('/reset_counter')
-def reset_counter():
-    global count
-    count = 0
-    return redirect('/lab1/counter') 
-
-@app.route("/lab1/info")
-def info():    
-    return redirect("/lab1/author") 
-
-@app.route("/created")
-def created():
-    css_url = url_for('static', filename='lab1.css')
-    return f'''
-<!doctype html>
-<html>
-    <head>
-        <link rel="stylesheet" href="{css_url}">
-    </head>
-    <body>
-        <h1>Создано успешно</h1>
-        <div><i>что-то создано...</i></div>
-        <a href="/lab1">Назад к главной</a>
-    </body>
-</html>
-''', 201
 
 @app.route('/lab2/a')
 def a():
