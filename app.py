@@ -2,12 +2,12 @@ from flask import Flask, url_for, request
 import datetime
 from lab1 import lab1
 from lab2 import lab2
-from lab3 import lab3
+from lab3 import lab3  
 
 app = Flask(__name__)
 app.register_blueprint(lab1)
 app.register_blueprint(lab2)
-app.register_blueprint(lab3)
+app.register_blueprint(lab3) 
 
 access_log = []
 
@@ -38,11 +38,11 @@ def not_found(err):
         <title>404 - Страница не найдена</title>
         <link rel="stylesheet" href="{url_for('static', filename='lab1.css')}">
         <style>
-             body {{
+            body {{
                 text-align: center;
                 padding: 50px;
                 font-family: Arial, sans-serif;
-            max-width: 1200px;
+                max-width: 1200px;
                 margin: 0 auto;
                 background-color: #f8f9fa;
             }}
@@ -57,12 +57,12 @@ def not_found(err):
                 font-size: 80px;
                 color: #ff6b6b;
                 margin: 0;
-             text-align: center;
+                text-align: center;
             }}
             h2 {{
                 color: #333;
                 margin: 20px 0;
-            text-align: center;
+                text-align: center;
             }}
             .info-box {{
                 background: #e9ecef;
@@ -94,16 +94,6 @@ def not_found(err):
             .log-entry:last-child {{
                 border-bottom: none;
             }}
-            .log-time {{
-                color: #6c757d;
-            }}
-            .log-user {{
-                color: #007bff;
-                font-weight: bold;
-            }}
-            .log-action {{
-                color: #28a745;
-            }}
             .home-link {{
                 display: inline-block;
                 padding: 12px 24px;
@@ -122,11 +112,11 @@ def not_found(err):
                 margin: 20px auto;
                 display: block;
                 border-radius: 10px;
-             }}
+            }}
         </style>
     </head>
     <body>
-       <div class="error-container">
+        <div class="error-container">
             <h1>404</h1>
             <h2>Страница не найдена</h2>
             
@@ -270,30 +260,30 @@ def internal_server_error(err):
         <title>500 - Ошибка сервера</title>
         <link rel="stylesheet" href="''' + url_for('static', filename='lab1.css') + '''">
         <style>
-            body {
+            body {{
                 text-align: center;
                 padding: 50px;
                 font-family: Arial, sans-serif;
                 background-color: #fff5f5;
-            }
-            h1 {
+            }}
+            h1 {{
                 font-size: 80px;
                 color: #e53e3e;
                 margin: 0;
-            }
-            h2 {
+            }}
+            h2 {{
                 color: #333;
                 margin: 20px 0;
-            }
-            .error-box {
+            }}
+            .error-box {{
                 background: white;
                 padding: 20px;
                 border-radius: 10px;
                 max-width: 600px;
                 margin: 20px auto;
                 border-left: 4px solid #e53e3e;
-            }
-            a {
+            }}
+            a {{
                 display: inline-block;
                 padding: 10px 20px;
                 background: grey;
@@ -301,10 +291,10 @@ def internal_server_error(err):
                 text-decoration: none;
                 border-radius: 5px;
                 margin: 10px;
-            }
-            a:hover {
+            }}
+            a:hover {{
                 background: black;
-            }
+            }}
         </style>
     </head>
     <body>
@@ -324,7 +314,7 @@ def internal_server_error(err):
         
         <p style="margin-top: 30px; color: #666; font-size: 14px;">
             Если ошибка повторяется, свяжитесь с администратором: 
-            <a href="malito:rita.berezhnayaaa@gmail.com" style="color: #555;">rita.berezhnayaaa@gmail.com</a>
+            <a href="mailto:rita.berezhnayaaa@gmail.com" style="color: #555;">rita.berezhnayaaa@gmail.com</a>
         </p>
     </body>
 </html>''', 500
@@ -353,10 +343,10 @@ def index():
             <nav>
                 <ul>
                     <li><a href="/lab1">Первая лабораторная</a></li>
-                     <li><a href="/lab2">Вторая лабораторная</a></li>
-                      <li><a href="/lab3">Третья лабораторная</a></li>
+                    <li><a href="/lab2">Вторая лабораторная</a></li>
+                    <li><a href="/lab3">Третья лабораторная</a></li>
                 </ul>
-             </nav>
+            </nav>
         </main>
         
         <footer>
@@ -364,7 +354,7 @@ def index():
             &copy; Бережная Маргарита Валерьевна, ФБИ-33, 3 курс, 2025
         </footer>
     </body>
-</html>''' 
+</html>'''
 
 @app.route("/http_codes")
 def http_codes():
@@ -372,7 +362,10 @@ def http_codes():
 <!doctype html>
 <html>
     <head>
-        <link rel="stylesheet" href="''' + url_for('static', filename='lab1.css') + '''">
+         <link rel="stylesheet" href="/static/main.css">
+        <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+        <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
         <title>Коды ответов HTTP</title>
     </head>
     <body>
