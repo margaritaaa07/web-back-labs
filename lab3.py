@@ -30,7 +30,25 @@ def form1():
     age = request.args.get('age')
     sex = request.args.get('sex')
     
-    if user and age and sex:
-        return render_template('form1.html', user=user, age=age, sex=sex)
-    else:
-        return render_template('form1.html')  
+    print(f"DEBUG: user={user}, age={age}, sex={sex}")  
+    
+    errors = {}
+  
+    if any([user, age, sex]):
+        if not user or user.strip() == '':
+            errors['user'] = 'Заполните поле!'
+        if not age or age.strip() == '':
+            errors['age'] = 'Заполните поле!'
+        
+        print(f"DEBUG: errors={errors}")  
+
+        if errors:
+            return render_template('form1.html', 
+                                 user=user or '', age=age or '', sex=sex or '', 
+                                 errors=errors)
+        
+        if user and age and sex:
+            return render_template('form1.html', 
+                                 user=user, age=age, sex=sex)
+    
+    return render_template('form1.html', user=user or '', age=age or '', sex=sex or '')
