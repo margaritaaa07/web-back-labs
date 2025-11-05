@@ -36,7 +36,7 @@ def not_found(err):
 <html>
     <head>
         <title>404 - Страница не найдена</title>
-        <link rel="stylesheet" href="{url_for('static', filename='lab1.css')}">
+        <link rel="stylesheet" href="{url_for('static', filename='lab1/lab1.css')}">
         <style>
             body {{
                 text-align: center;
@@ -120,7 +120,7 @@ def not_found(err):
             <h1>404</h1>
             <h2>Страница не найдена</h2>
             
-            <img src="{url_for('static', filename='404.jpg')}" alt="Страница не найдена">
+            <img src="{url_for('static', filename='lab1/404.jpg')}" alt="Страница не найдена">
             
             <div class="info-box">
                 <p><strong>Ваш IP-адрес:</strong> {client_ip}</p>
@@ -162,7 +162,7 @@ def bad_request():
 <html>
     <head>
         <title>400 Bad Request</title>
-        <link rel="stylesheet" href="''' + url_for('static', filename='lab1.css') + '''">
+        <link rel="stylesheet" href="''' + url_for('static', filename='lab1/lab1.css') + '''">
     </head>
     <body>
         <h1>400 Bad Request</h1>
@@ -178,7 +178,7 @@ def unauthorized():
 <html>
     <head>
         <title>401 Unauthorized</title>
-        <link rel="stylesheet" href="''' + url_for('static', filename='lab1.css') + '''">
+        <link rel="stylesheet" href="''' + url_for('static', filename='lab1/lab1.css') + '''">
     </head>
     <body>
         <h1>401 Unauthorized</h1>
@@ -194,7 +194,7 @@ def payment_required():
 <html>
     <head>
         <title>402 Payment Required</title>
-        <link rel="stylesheet" href="''' + url_for('static', filename='lab1.css') + '''">
+       <link rel="stylesheet" href="''' + url_for('static', filename='lab1/lab1.css') + '''">
     </head>
     <body>
         <h1>402 Payment Required</h1>
@@ -210,7 +210,7 @@ def forbidden():
 <html>
     <head>
         <title>403 Forbidden</title>
-        <link rel="stylesheet" href="''' + url_for('static', filename='lab1.css') + '''">
+       <link rel="stylesheet" href="''' + url_for('static', filename='lab1/lab1.css') + '''">
     </head>
     <body>
         <h1>403 Forbidden</h1>
@@ -226,7 +226,7 @@ def method_not_allowed():
 <html>
     <head>
         <title>405 Method Not Allowed</title>
-        <link rel="stylesheet" href="''' + url_for('static', filename='lab1.css') + '''">
+        <link rel="stylesheet" href="''' + url_for('static', filename='lab1/lab1.css') + '''">
     </head>
     <body>
         <h1>405 Method Not Allowed</h1>
@@ -242,7 +242,7 @@ def teapot():
 <html>
     <head>
         <title>418 I'm a teapot</title>
-        <link rel="stylesheet" href="''' + url_for('static', filename='lab1.css') + '''">
+        <link rel="stylesheet" href="''' + url_for('static', filename='lab1/lab1.css') + '''">
     </head>
     <body>
         <h1>418 I'm a teapot</h1>
@@ -258,7 +258,7 @@ def internal_server_error(err):
 <html>
     <head>
         <title>500 - Ошибка сервера</title>
-        <link rel="stylesheet" href="''' + url_for('static', filename='lab1.css') + '''">
+        <link rel="stylesheet" href="''' + url_for('static', filename='lab1/lab1.css') + '''">
         <style>
             body {{
                 text-align: center;
@@ -331,7 +331,10 @@ def index():
 <!doctype html>
 <html>
     <head>
-        <link rel="stylesheet" href="''' + url_for('static', filename='lab1.css') + '''">
+        <link rel="stylesheet" href="/static/lab1/main.css">
+        <link rel="icon" type="image/x-icon" href="/static/lab2/favicon.ico">
+        <link rel="icon" type="image/png" sizes="32x32" href="/static/lab2/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/static/lab2/favicon-16x16.png">
         <title>НГТУ, ФБ, Лабораторные работы</title>
     </head>
     <body>
@@ -362,7 +365,7 @@ def http_codes():
 <!doctype html>
 <html>
     <head>
-         <link rel="stylesheet" href="/static/main.css">
+         <link rel="stylesheet" href="''' + url_for('static', filename='lab1/lab1.css') + '''">
         <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
         <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
         <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
