@@ -2,8 +2,13 @@ body {
     background-color: #e9a8cc;
     color: #e3319c;
     font-family: Arial, sans-serif;
-    margin: 20px;
+    margin: 0;
+    padding: 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
+
 header {
     background-color: #e6a2e3;
     color: white;
@@ -21,6 +26,7 @@ main {
     margin-bottom: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border: 2px solid #e0e0e0;
+    flex: 1;
 }
 
 footer {
@@ -31,6 +37,7 @@ footer {
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     font-size: 14px;
+    margin-top: auto;
 }
 
 h1 {

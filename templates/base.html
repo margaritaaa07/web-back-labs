@@ -12,7 +12,8 @@
             margin: 0;
             padding: 20px;
             min-height: 100vh;
-            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
             {% if request.cookies.get('color') %}
             color: {{ request.cookies.get('color') }};
             {% endif %}
@@ -62,6 +63,7 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             border: 2px solid #e0e0e0;
             min-height: 400px;
+            flex: 1;
         }
 
         footer {
@@ -72,6 +74,7 @@
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             font-size: 14px;
+            margin-top: auto;
         }
 
         nav {
