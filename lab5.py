@@ -2,6 +2,65 @@ from flask import Blueprint, render_template, request, redirect, session
 lab5 = Blueprint('lab5', __name__)
 import psycopg2
 from psycopg2.extras import RealDictCursor
+from werkzeug.security import check_password_hash, generate_password_hash
+
+def init_db():
+    """Инициализация базы данных с созданием таблиц и прав"""
+    try:
+        conn = psycopg2.connect(
+            host='127.0.0.1',
+            database='margarita_berezhnaya_knowledge_base',  
+            user='postgres',  
+            password='123',   
+            port=5432
+        )
+        cur = conn.cursor()
+
+        cur.execute('''
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                login VARCHAR(30) UNIQUE NOT NULL,
+                password VARCHAR(162) NOT NULL
+            )
+        ''')
+
+        cur.execute('GRANT ALL PRIVILEGES ON TABLE users TO margarita_berezhnaya_knowledge_base')
+        cur.execute('GRANT ALL PRIVILEGES ON SEQUENCE users_id_seq TO margarita_berezhnaya_knowledge_base')
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        print(" Таблица users создана и права выданы")
+ 
+        return check_user_access()
+        
+    except Exception as e:
+        print(f" Ошибка при инициализации БД: {e}")
+        return False
+
+def check_user_access():
+    """Проверка доступа обычного пользователя к таблице"""
+    try:
+        conn = psycopg2.connect(
+            host='127.0.0.1',
+            database='margarita_berezhnaya_knowledge_base',  
+            user='margarita_berezhnaya_knowledge_base',      
+            password='123',
+            port=5432
+        )
+        cur = conn.cursor()
+
+        cur.execute("SELECT 1 FROM users LIMIT 1")
+        result = cur.fetchone()
+        
+        cur.close()
+        conn.close()
+        print(" Доступ к таблице users подтвержден")
+        return True
+        
+    except Exception as e:
+        print(f" Нет доступа к таблице users: {e}")
+        return False
 
 def check_connection():
     """Функция для проверки подключения к БД"""
@@ -25,11 +84,14 @@ def check_connection():
             WHERE table_schema = 'public'
         """)
         tables = cur.fetchall()
-        print(f" Таблицы в базе: {tables}")
+        print(f"Таблицы в базе: {tables}")
 
-        cur.execute("SELECT * FROM users")
-        users = cur.fetchall()
-        print(f"👥 Пользователи в БД: {users}")
+        try:
+            cur.execute("SELECT COUNT(*) FROM users")
+            count = cur.fetchone()[0]
+            print(f" Количество пользователей в БД: {count}")
+        except psycopg2.Error as e:
+            print(f"  Нет доступа к таблице users: {e}")
         
         cur.close()
         conn.close()
@@ -41,7 +103,14 @@ def check_connection():
 print("🔍 Проверяем подключение к БД...")
 check_connection()
 
-def init_db():
+if not init_db():
+    print("  Проблема с инициализацией БД, но продолжаем работу")
+
+@lab5.route('/lab5/')
+def lab():
+    return render_template('lab5/lab5.html', username=session.get('login', 'anonymous'))
+
+def db_connect():
     try:
         conn = psycopg2.connect(
             host='127.0.0.1',
@@ -50,45 +119,19 @@ def init_db():
             password='123',
             port=5432
         )
-        cur = conn.cursor()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        return conn, cur
+    except Exception as e:
+        print(f" Ошибка подключения к БД: {e}")
+        raise
 
-        cur.execute('''
-            CREATE TABLE IF NOT EXISTS users (
-                id SERIAL PRIMARY KEY,
-                login VARCHAR(30) UNIQUE NOT NULL,
-                password VARCHAR(162) NOT NULL
-            )
-        ''')
-        
+def db_close(conn, cur):
+    try:
         conn.commit()
         cur.close()
         conn.close()
-        print(" Таблица users проверена/создана")
     except Exception as e:
-        print(f" Ошибка при инициализации БД: {e}")
-
-init_db()
-
-@lab5.route('/lab5/')
-def lab():
-    return render_template('lab5/lab5.html', username=session.get('login', 'anonymous'))
-
-def db_connect():
-    conn = psycopg2.connect(
-        host='127.0.0.1',
-        database='margarita_berezhnaya_knowledge_base',  
-        user='margarita_berezhnaya_knowledge_base',      
-        password='123',
-        port=5432
-    )
-    cur = conn.cursor(cursor_factory = RealDictCursor)
-
-    return conn, cur
-
-def db_close(conn, cur):
-    conn.commit()
-    cur.close()
-    conn.close()  
+        print(f"  Ошибка при закрытии соединения: {e}")
 
 @lab5.route('/lab5/register', methods=['GET', 'POST'])
 def register():
@@ -108,7 +151,7 @@ def register():
         return render_template('lab5/register.html', error='Пароль должен быть не менее 3 символов')
     
     try:
-         conn, cur = db_connect()
+        conn, cur = db_connect()
 
         print(f" Проверяем пользователя: {login}")
         cur.execute("SELECT login FROM users WHERE login = %s", (login,))
@@ -116,30 +159,28 @@ def register():
         
         if existing_user:
             print(f" Пользователь уже существует: {existing_user}")
-            cur.close()
-            conn.close()
+            db_close(conn, cur)
             return render_template('lab5/register.html',
                                 error="Такой пользователь уже существует")
 
-        print(f" Добавляем пользователя: {login}")
-        cur.execute("INSERT INTO users (login, password) VALUES (%s, %s)", (login, password))
+        print(f"➕ Добавляем пользователя: {login}")
+        password_hash = generate_password_hash(password)
+        cur.execute("INSERT INTO users (login, password) VALUES (%s, %s)", (login, password_hash))
         conn.commit()
 
-        cur.execute("SELECT * FROM users WHERE login = %s", (login,))
-        new_user = cur.fetchone()
-        print(f" Пользователь добавлен: {new_user}")
-
-        cur.execute("SELECT * FROM users")
-        all_users = cur.fetchall()
-        print(f"📋 Все пользователи в БД: {all_users}")
+        print(f"Пользователь {login} добавлен в БД")
         
         db_close(conn, cur)
         
         return render_template('lab5/success.html', login=login)
     
+    except psycopg2.Error as e:
+        print(f" Ошибка PostgreSQL: {e}")
+        error_msg = "Ошибка доступа к базе данных. Таблица не доступна для записи."
+        return render_template('lab5/register.html', error=error_msg)
     except Exception as e:
-        print(f" Ошибка: {e}")
-        return render_template('lab5/register.html', error=f'Ошибка базы данных: {str(e)}')
+        print(f" Общая ошибка: {e}")
+        return render_template('lab5/register.html', error=f'Ошибка: {str(e)}')
     
 
 @lab5.route('/lab5/login', methods=['GET', 'POST'])
@@ -156,24 +197,27 @@ def login():
     try:
         conn, cur = db_connect()
         
-        cur.execute(f"SELECT * FROM users WHERE login='{login}';")
+        cur.execute("SELECT * FROM users WHERE login = %s", (login,))
         user = cur.fetchone()
-
-    if not user:
-            db_close(conn, cur)
-            return render_template('lab5/login.html',
-                                error='Логин и/или пароль неверны')
         
-    if user['password'] != password:
+        if user and check_password_hash(user['password'], password):
+            session['login'] = login
+            session['user_id'] = user['id']
             db_close(conn, cur)
-            return render_template('lab5/login.html',
-                                error='Логин и/или пароль неверны')
-        
-        session['login'] = login
-        db_close(conn, cur)
-        return render_template('lab5/success_login.html', login=login)
+            return redirect('/lab5/')
+        else:
+            db_close(conn, cur)
+            return render_template('lab5/login.html', error="Неверный логин или пароль")
     
-    except psycopg2.OperationalError as e:
-        return render_template('lab5/login.html', error=f'Ошибка подключения к БД: {str(e)}')
+    except psycopg2.Error as e:
+        print(f" Ошибка PostgreSQL при входе: {e}")
+        return render_template('lab5/login.html', error="Ошибка доступа к базе данных")
     except Exception as e:
-        return render_template('lab5/login.html', error=f'Ошибка базы данных: {str(e)}')
+        print(f" Общая ошибка при входе: {e}")
+        return render_template('lab5/login.html', error=f'Ошибка: {str(e)}')
+
+
+@lab5.route('/lab5/logout')
+def logout():
+    session.clear()
+    return redirect('/lab5/')
