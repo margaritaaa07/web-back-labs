@@ -337,3 +337,20 @@ def my_articles():
     except Exception as e:
         print(f" Ошибка при получении статей: {e}")
         return f"<h1>Ошибка</h1><p>Ошибка при загрузке статей: {str(e)}</p><a href='/lab5/'>На главную</a>"
+
+@lab5.route('/lab5/list')
+def list():
+    login = session.get('login')
+    if not login:
+        return redirect('/lab5/login')
+    
+    conn, cur = db_connect()
+
+    cur.execute(f"SELECT id FROM users WHERE login='{login}';")
+    user_id = cur.fetchone()["id"]
+
+    cur.execute(f"SELECT * FROM articles WHERE user_id='{user_id}';")
+    articles = cur.fetchall()
+
+    db_close(conn, cur)
+    return render_template('/lab5/articles.html', articles=articles)        
