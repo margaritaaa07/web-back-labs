@@ -24,13 +24,28 @@ def init_db():
             )
         ''')
 
+        cur.execute('''
+            CREATE TABLE IF NOT EXISTS articles (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL,
+                title VARCHAR(200) NOT NULL,
+                article_text TEXT NOT NULL,
+                is_favorite BOOLEAN DEFAULT FALSE,
+                is_public BOOLEAN DEFAULT FALSE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            )
+        ''')
+
         cur.execute('GRANT ALL PRIVILEGES ON TABLE users TO margarita_berezhnaya_knowledge_base')
+        cur.execute('GRANT ALL PRIVILEGES ON TABLE articles TO margarita_berezhnaya_knowledge_base')
         cur.execute('GRANT ALL PRIVILEGES ON SEQUENCE users_id_seq TO margarita_berezhnaya_knowledge_base')
+        cur.execute('GRANT ALL PRIVILEGES ON SEQUENCE articles_id_seq TO margarita_berezhnaya_knowledge_base')
         
         conn.commit()
         cur.close()
         conn.close()
-        print(" Таблица users создана и права выданы")
+        print(" Таблицы users и articles созданы и права выданы")
  
         return check_user_access()
         
@@ -51,15 +66,15 @@ def check_user_access():
         cur = conn.cursor()
 
         cur.execute("SELECT 1 FROM users LIMIT 1")
-        result = cur.fetchone()
+        cur.execute("SELECT 1 FROM articles LIMIT 1")
         
         cur.close()
         conn.close()
-        print(" Доступ к таблице users подтвержден")
+        print(" Доступ к таблицам users и articles подтвержден")
         return True
         
     except Exception as e:
-        print(f" Нет доступа к таблице users: {e}")
+        print(f" Нет доступа к таблицам: {e}")
         return False
 
 def check_connection():
@@ -84,14 +99,21 @@ def check_connection():
             WHERE table_schema = 'public'
         """)
         tables = cur.fetchall()
-        print(f"Таблицы в базе: {tables}")
+        print(f" Таблицы в базе: {tables}")
 
         try:
             cur.execute("SELECT COUNT(*) FROM users")
             count = cur.fetchone()[0]
             print(f" Количество пользователей в БД: {count}")
         except psycopg2.Error as e:
-            print(f"  Нет доступа к таблице users: {e}")
+            print(f" Нет доступа к таблице users: {e}")
+
+        try:
+            cur.execute("SELECT COUNT(*) FROM articles")
+            count = cur.fetchone()[0]
+            print(f" Количество статей в БД: {count}")
+        except psycopg2.Error as e:
+            print(f" Нет доступа к таблице articles: {e}")
         
         cur.close()
         conn.close()
@@ -100,11 +122,11 @@ def check_connection():
         print(f" Ошибка подключения: {e}")
         return False
 
-print("🔍 Проверяем подключение к БД...")
+print(" Проверяем подключение к БД...")
 check_connection()
 
 if not init_db():
-    print("  Проблема с инициализацией БД, но продолжаем работу")
+    print(" Проблема с инициализацией БД, но продолжаем работу")
 
 @lab5.route('/lab5/')
 def lab():
@@ -131,7 +153,7 @@ def db_close(conn, cur):
         cur.close()
         conn.close()
     except Exception as e:
-        print(f"  Ошибка при закрытии соединения: {e}")
+        print(f" Ошибка при закрытии соединения: {e}")
 
 @lab5.route('/lab5/register', methods=['GET', 'POST'])
 def register():
@@ -163,12 +185,12 @@ def register():
             return render_template('lab5/register.html',
                                 error="Такой пользователь уже существует")
 
-        print(f"➕ Добавляем пользователя: {login}")
+        print(f" Добавляем пользователя: {login}")
         password_hash = generate_password_hash(password)
         cur.execute("INSERT INTO users (login, password) VALUES (%s, %s)", (login, password_hash))
         conn.commit()
 
-        print(f"Пользователь {login} добавлен в БД")
+        print(f" Пользователь {login} добавлен в БД")
         
         db_close(conn, cur)
         
@@ -221,3 +243,97 @@ def login():
 def logout():
     session.clear()
     return redirect('/lab5/')
+    
+
+@lab5.route('/lab5/create', methods=['GET', 'POST'])
+def create():
+    login = session.get('login')
+    if not login:
+        return redirect('/lab5/login')
+
+    if request.method == 'GET':
+        return render_template('lab5/create_article.html')
+
+    title = request.form.get('title')
+    article_text = request.form.get('article_text')
+
+    if not (title and article_text):
+        return render_template('lab5/create_article.html', error='Заполните все поля')
+
+    try:
+        conn, cur = db_connect()
+
+        cur.execute("SELECT id FROM users WHERE login = %s", (login,))
+        user = cur.fetchone()
+        
+        if not user:
+            db_close(conn, cur)
+            return redirect('/lab5/login')
+        
+        user_id = user["id"]
+
+        cur.execute("""
+            INSERT INTO articles (user_id, title, article_text) 
+            VALUES (%s, %s, %s)
+        """, (user_id, title, article_text))
+
+        conn.commit()
+        print(f" Статья '{title}' добавлена в БД")
+        
+        db_close(conn, cur)
+        return redirect('/lab5')  
+    
+    except psycopg2.Error as e:
+        print(f" Ошибка PostgreSQL при создании статьи: {e}")
+        return render_template('lab5/create_article.html', error=f'Ошибка базы данных: {str(e)}')
+    except Exception as e:
+        print(f" Общая ошибка при создании статьи: {e}")
+        return render_template('lab5/create_article.html', error=f'Ошибка: {str(e)}')
+
+
+@lab5.route('/lab5/my_articles')
+def my_articles():
+    """Показать статьи пользователя"""
+    login = session.get('login')
+    if not login:
+        return redirect('/lab5/login')
+
+    try:
+        conn, cur = db_connect()
+
+        cur.execute("""
+            SELECT a.id, a.title, a.article_text, a.is_favorite, a.is_public
+            FROM articles a 
+            JOIN users u ON a.user_id = u.id 
+            WHERE u.login = %s 
+            ORDER BY a.id DESC
+        """, (login,))
+        
+        articles = cur.fetchall()
+        
+        db_close(conn, cur)
+
+        print(f" Найдено статей: {len(articles)}")
+        for article in articles:
+            print(f"   - {article['title']}")
+
+        articles_html = "<h1>Мои статьи</h1>"
+        if articles:
+            for article in articles:
+                articles_html += f"""
+                <div style='border:1px solid #ccc; padding:10px; margin:10px;'>
+                    <h3>{article['title']}</h3>
+                    <p>{article['article_text']}</p>
+                    <small>ID: {article['id']}</small>
+                </div>
+                """
+        else:
+            articles_html += "<p>У вас пока нет статей</p>"
+        
+        articles_html += "<a href='/lab5/'>На главную</a>"
+        
+        return articles_html
+    
+    except Exception as e:
+        print(f" Ошибка при получении статей: {e}")
+        return f"<h1>Ошибка</h1><p>Ошибка при загрузке статей: {str(e)}</p><a href='/lab5/'>На главную</a>"
